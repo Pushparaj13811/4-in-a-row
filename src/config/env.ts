@@ -9,4 +9,6 @@ export const Env: env = {
   DB_USER: process.env.DB_USER as string,
   DB_PASSWORD: process.env.DB_PASSWORD as string,
   KAFKA_BROKER: process.env.KAFKA_BROKER as string,
+  KAFKA_CLIENT_ID: process.env.KAFKA_CLIENT_ID as string,
+  ENABLE_KAFKA: process.env.ENABLE_KAFKA === 'true',
 };
