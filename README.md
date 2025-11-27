@@ -2,9 +2,14 @@
 
 A real-time multiplayer **4-in-a-Row** (Connect Four) game server built with **Node.js**, **WebSockets**, **PostgreSQL**, and **Kafka**.
 
-**Repository:** [https://github.com/Pushparaj13811/4-in-a-row](https://github.com/Pushparaj13811/4-in-a-row)
+## Repository Links
 
-**Frontend Repository:** [https://github.com/Pushparaj13811/4-in-a-row-frontend](https://github.com/Pushparaj13811/4-in-a-row-frontend)
+This project is split into two separate repositories:
+
+- **Backend (this repo):** [https://github.com/Pushparaj13811/4-in-a-row](https://github.com/Pushparaj13811/4-in-a-row)
+- **Frontend:** [https://github.com/Pushparaj13811/4-in-a-row-frontend](https://github.com/Pushparaj13811/4-in-a-row-frontend)
+
+**Important:** You need BOTH repositories to run the complete application. Clone both repos to get started.
 
 ## What is this?
 
@@ -15,16 +20,35 @@ This is the backend server for a multiplayer Connect Four game. It handles:
 - Leaderboard and game statistics
 - Optional analytics via Kafka
 
-## How to Run This Application
+## Complete Setup Guide
+
+This application requires both the backend and frontend to work. Follow these steps:
 
 ### Prerequisites
 
 Make sure you have these installed on your computer:
 - **Node.js** (version 24 or higher) - [Download here](https://nodejs.org/)
 - **PostgreSQL** (version 12 or higher) - [Download here](https://www.postgresql.org/download/)
+- **Git** - To clone repositories
 - **Kafka** (optional, only for analytics) - [Setup instructions below](#optional-kafka-analytics)
 
 ### Step-by-Step Setup
+
+#### Step 0: Clone Both Repositories
+
+You need to clone both the backend and frontend repositories:
+
+```bash
+# Clone the backend (this repo)
+git clone https://github.com/Pushparaj13811/4-in-a-row.git
+cd 4-in-a-row
+
+# Clone the frontend (in a separate directory)
+cd ..
+git clone https://github.com/Pushparaj13811/4-in-a-row-frontend.git
+```
+
+Now continue with the backend setup below, then move to the frontend setup.
 
 #### Step 1: Install Dependencies
 
@@ -98,7 +122,15 @@ The backend is now running and ready to accept connections from the frontend!
 
 ### Step 5: Start the Frontend
 
-Now you need to start the frontend application to play the game. Open a **new terminal window** and navigate to the frontend folder, then follow the frontend README instructions.
+Now you need to start the frontend application to play the game:
+
+1. Open a **new terminal window** (keep backend running in the other terminal)
+2. Navigate to the frontend repository folder
+3. Follow the complete setup guide in the [Frontend README](https://github.com/Pushparaj13811/4-in-a-row-frontend#readme)
+
+**You should have TWO terminals running:**
+- Terminal 1: Backend server (`npm run dev` in backend folder)
+- Terminal 2: Frontend server (`npm run dev` in frontend folder)
 
 ---
 
