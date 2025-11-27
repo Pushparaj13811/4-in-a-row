@@ -2,6 +2,10 @@
 
 A real-time multiplayer **4-in-a-Row** (Connect Four) game server built with **Node.js**, **WebSockets**, **PostgreSQL**, and **Kafka**.
 
+**Repository:** [https://github.com/Pushparaj13811/4-in-a-row](https://github.com/Pushparaj13811/4-in-a-row)
+
+**Frontend Repository:** [https://github.com/Pushparaj13811/4-in-a-row-frontend](https://github.com/Pushparaj13811/4-in-a-row-frontend)
+
 ## What is this?
 
 This is the backend server for a multiplayer Connect Four game. It handles:
