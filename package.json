@@ -4,19 +4,20 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=.env src/server.ts",
+    "dev:consumer": "tsx --watch --env-file=.env src/kafka/consumer.ts",
     "build": "tsc",
     "start": "node --env-file=.env dist/server.js",
+    "start:consumer": "node --env-file=.env dist/kafka/consumer.js",
     "format": "prettier --write \"src/**/*.{ts,js,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,js,json}\""
+    "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
+    "db:setup": "tsx --env-file=.env src/db/setups.ts"
   },
   "dependencies": {
-    "express": "^5.1.0",
     "kafkajs": "^2.2.4",
     "pg": "^8.13.1",
     "ws": "^8.18.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.5",
     "@types/node": "^22.10.2",
     "@types/pg": "^8.11.10",
     "@types/ws": "^8.5.13",
