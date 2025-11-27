@@ -30,12 +30,12 @@ class GameServer {
           // Temporary echo response
           this.#send(ws, {
             type: 'ack',
-            message: 'Message received'
+            message: 'Message received',
           });
         } catch {
           this.#send(ws, {
             type: 'error',
-            message: 'Invalid JSON'
+            message: 'Invalid JSON',
           });
         }
       });

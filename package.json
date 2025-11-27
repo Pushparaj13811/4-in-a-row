@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node --watch --env-file=.env --experimental-strip-types src/server.ts",
+    "dev": "tsx watch --env-file=.env src/server.ts",
     "build": "tsc",
-    "start": "node --env-file=.env dist/server.js"
+    "start": "node --env-file=.env dist/server.js",
+    "format": "prettier --write \"src/**/*.{ts,js,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,json}\""
   },
   "dependencies": {
     "express": "^5.1.0",
@@ -18,6 +20,8 @@
     "@types/node": "^22.10.2",
     "@types/pg": "^8.11.10",
     "@types/ws": "^8.5.13",
+    "prettier": "^3.7.1",
+    "tsx": "^4.20.6",
     "typescript": "^5.7.2"
   },
   "engines": {
