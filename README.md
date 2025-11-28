@@ -99,7 +99,25 @@ ENABLE_KAFKA=false
 
 **Important**: Update `DB_PASSWORD` with your actual PostgreSQL password.
 
-#### Step 4: Start the Backend Server
+#### Step 4: Initialize Database Tables (First Time Only)
+
+**Before starting the server for the first time**, you need to set up the database tables:
+
+```bash
+npm run db:setup
+```
+
+This will create all necessary tables (`players`, `games`, `leaderboard`) in your database.
+
+You should see output like:
+```
+🗄️  Setting up database tables...
+✅ Database tables created successfully
+```
+
+**Note**: You only need to run this command once when setting up the project for the first time.
+
+#### Step 5: Start the Backend Server
 
 ```bash
 npm run dev
@@ -120,7 +138,7 @@ You should see output like this:
 
 The backend is now running and ready to accept connections from the frontend!
 
-### Step 5: Start the Frontend
+### Step 6: Start the Frontend
 
 Now you need to start the frontend application to play the game:
 
