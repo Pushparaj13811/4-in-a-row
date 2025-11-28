@@ -18,18 +18,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build backend
-        run: npm run build
-
       - name: Deploy to EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -39,12 +27,12 @@ jobs:
           echo "$EC2_SSH_KEY" > ec2_key.pem
           chmod 600 ec2_key.pem
 
-          # Create deployment package
-          tar -czf backend-deploy.tar.gz dist package.json package-lock.json
+          # Create deployment package (source files)
+          tar -czf backend-source.tar.gz --exclude=node_modules --exclude=dist --exclude=.git .
 
           # Copy to EC2
           scp -i ec2_key.pem -o StrictHostKeyChecking=no \
-            backend-deploy.tar.gz ${EC2_USER}@${EC2_HOST}:/tmp/
+            backend-source.tar.gz ${EC2_USER}@${EC2_HOST}:/tmp/
 
           # Deploy on EC2
           ssh -i ec2_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'EOF'
@@ -53,29 +41,37 @@ jobs:
             # Create backend directory if it doesn't exist
             mkdir -p /home/ubuntu/GATI-mail-backend/test/4-in-a-row
 
+            # Extract source files
+            cd /home/ubuntu/GATI-mail-backend/test/4-in-a-row
+            tar -xzf /tmp/backend-source.tar.gz
+
+            # Install dependencies and build on server
+            npm ci
+            npm run build
+
             # Create systemd service if it doesn't exist
             if [ ! -f /etc/systemd/system/4-in-a-row-backend.service ]; then
               echo "Creating systemd service..."
               sudo tee /etc/systemd/system/4-in-a-row-backend.service > /dev/null <<'SYSTEMD'
-              [Unit]
-              Description=4 in a Row Backend WebSocket Server
-              After=network.target
+[Unit]
+Description=4 in a Row Backend WebSocket Server
+After=network.target
 
-              [Service]
-              Type=simple
-              User=ubuntu
-              WorkingDirectory=/home/ubuntu/GATI-mail-backend/test/4-in-a-row
-              ExecStart=/usr/bin/node dist/index.js
-              Restart=on-failure
-              RestartSec=10
-              StandardOutput=append:/var/log/4-in-a-row-backend.log
-              StandardError=append:/var/log/4-in-a-row-backend-error.log
-              Environment=NODE_ENV=production
-              Environment=PORT=3008
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/GATI-mail-backend/test/4-in-a-row
+ExecStart=/usr/bin/node dist/index.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/var/log/4-in-a-row-backend.log
+StandardError=append:/var/log/4-in-a-row-backend-error.log
+Environment=NODE_ENV=production
+Environment=PORT=3008
 
-              [Install]
-              WantedBy=multi-user.target
-              SYSTEMD
+[Install]
+WantedBy=multi-user.target
+SYSTEMD
 
               sudo systemctl daemon-reload
               sudo systemctl enable 4-in-a-row-backend
@@ -84,19 +80,12 @@ jobs:
             # Stop existing backend
             sudo systemctl stop 4-in-a-row-backend || true
 
-            # Extract new build
-            cd /home/ubuntu/GATI-mail-backend/test/4-in-a-row
-            tar -xzf /tmp/backend-deploy.tar.gz
-
-            # Install production dependencies
-            npm ci --production
-
             # Start backend service
             sudo systemctl start 4-in-a-row-backend
             sudo systemctl status 4-in-a-row-backend --no-pager
 
             # Cleanup
-            rm /tmp/backend-deploy.tar.gz
+            rm /tmp/backend-source.tar.gz
           EOF
 
           # Cleanup local key
