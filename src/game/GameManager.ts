@@ -23,7 +23,15 @@ export class GameManager {
    * Adds a player to the matchmaking queue
    */
   addPlayer(username: string, ws: WebSocket): void {
-    // Check if player is already in a game
+    // Check if player was disconnected and trying to rejoin
+    const disconnectData = this.#disconnectedPlayers.get(username);
+    if (disconnectData) {
+      console.log(`🔄 ${username} rejoining via login after disconnect`);
+      this.rejoinGame(username, disconnectData.gameId, ws);
+      return;
+    }
+
+    // Check if player is already in a game (and not disconnected)
     const existingGameId = this.#playerToGame.get(username);
     if (existingGameId) {
       this.send(ws, {
@@ -243,8 +251,8 @@ export class GameManager {
     const opponent = game.players.find(p => p.username !== username);
     if (opponent && !opponent.isBot) {
       this.send(opponent.ws, {
-        type: 'error',
-        message: `${username} disconnected. They have 30s to reconnect.`
+        type: 'opponentDisconnected',
+        message: `${username} disconnected. They have 30 seconds to reconnect.`
       });
     }
   }
@@ -252,12 +260,42 @@ export class GameManager {
   /**
    * Handles player forfeit due to disconnect timeout
    */
-  #handleForfeit(gameId: string, username: string): void {
+  async #handleForfeit(gameId: string, username: string): Promise<void> {
     const game = this.#games.get(gameId);
     if (!game) return;
 
     const opponent = game.players.find(p => p.username !== username);
-    if (opponent && !opponent.isBot) {
+    const disconnectedPlayer = game.players.find(p => p.username === username);
+    if (!opponent || !disconnectedPlayer) return;
+
+    // Record the forfeit as a win for the opponent
+    const duration = game.getDuration();
+    const winner = opponent.username;
+
+    // Send Kafka event
+    await kafkaProducer.sendGameEnd(
+      game.id,
+      game.players[0].username,
+      game.players[1].username,
+      winner,
+      game.moveCount,
+      duration
+    );
+
+    // Save to database
+    await db.saveGame(
+      game.id,
+      game.players[0].username,
+      game.players[1].username,
+      winner,
+      game.moveCount,
+      duration
+    );
+
+    console.log(`📊 Game ${gameId} recorded: ${winner} won by forfeit (${username} disconnected)`);
+
+    // Notify opponent
+    if (!opponent.isBot) {
       this.send(opponent.ws, {
         type: 'opponentLeft',
         winner: opponent.color
@@ -308,6 +346,16 @@ export class GameManager {
         board: game.board,
         opponent: opponent?.username
       });
+
+      // Notify opponent that player has reconnected
+      if (opponent && !opponent.isBot) {
+        this.send(opponent.ws, {
+          type: 'move',
+          board: game.board,
+          currentPlayer: game.currentPlayer,
+          winner: game.winner
+        });
+      }
     }
   }
 
