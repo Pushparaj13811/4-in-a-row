@@ -57,25 +57,26 @@ jobs:
             # Create systemd service if it doesn't exist
             if [ ! -f /etc/systemd/system/4-in-a-row-backend.service ]; then
               echo "Creating systemd service..."
-              sudo tee /etc/systemd/system/4-in-a-row-backend.service > /dev/null <<SYSTEMD
-[Unit]
-Description=4 in a Row Backend WebSocket Server
-After=network.target
+              sudo tee /etc/systemd/system/4-in-a-row-backend.service > /dev/null <<'SYSTEMD'
+              [Unit]
+              Description=4 in a Row Backend WebSocket Server
+              After=network.target
 
-[Service]
-Type=simple
-User=$USER
-WorkingDirectory=/opt/4-in-a-row-backend
-ExecStart=/usr/bin/node dist/index.js
-Restart=on-failure
-RestartSec=10
-StandardOutput=append:/var/log/4-in-a-row-backend.log
-StandardError=append:/var/log/4-in-a-row-backend-error.log
-Environment=NODE_ENV=production
+              [Service]
+              Type=simple
+              User=$USER
+              WorkingDirectory=/opt/4-in-a-row-backend
+              ExecStart=/usr/bin/node dist/index.js
+              Restart=on-failure
+              RestartSec=10
+              StandardOutput=append:/var/log/4-in-a-row-backend.log
+              StandardError=append:/var/log/4-in-a-row-backend-error.log
+              Environment=NODE_ENV=production
+              Environment=PORT=3008
 
-[Install]
-WantedBy=multi-user.target
-SYSTEMD
+              [Install]
+              WantedBy=multi-user.target
+              SYSTEMD
 
               sudo systemctl daemon-reload
               sudo systemctl enable 4-in-a-row-backend
@@ -105,6 +106,25 @@ SYSTEMD
       - name: Verify deployment
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
+          echo "$EC2_SSH_KEY" > ec2_key.pem
+          chmod 600 ec2_key.pem
+
           sleep 5
-          curl -f http://${EC2_HOST}:3000/health || exit 1
+
+          # Check if backend service is running
+          ssh -i ec2_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'EOF'
+            if sudo systemctl is-active --quiet 4-in-a-row-backend; then
+              echo "✅ Backend service is running"
+              sudo systemctl status 4-in-a-row-backend --no-pager | head -n 10
+              exit 0
+            else
+              echo "❌ Backend service is not running"
+              sudo journalctl -u 4-in-a-row-backend -n 20
+              exit 1
+            fi
+          EOF
+
+          rm ec2_key.pem
