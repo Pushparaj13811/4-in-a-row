@@ -50,6 +50,37 @@ jobs:
           ssh -i ec2_key.pem -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} << 'EOF'
             set -e
 
+            # Create backend directory if it doesn't exist
+            sudo mkdir -p /opt/4-in-a-row-backend
+            sudo chown $USER:$USER /opt/4-in-a-row-backend
+
+            # Create systemd service if it doesn't exist
+            if [ ! -f /etc/systemd/system/4-in-a-row-backend.service ]; then
+              echo "Creating systemd service..."
+              sudo tee /etc/systemd/system/4-in-a-row-backend.service > /dev/null <<SYSTEMD
+[Unit]
+Description=4 in a Row Backend WebSocket Server
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=/opt/4-in-a-row-backend
+ExecStart=/usr/bin/node dist/index.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/var/log/4-in-a-row-backend.log
+StandardError=append:/var/log/4-in-a-row-backend-error.log
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+SYSTEMD
+
+              sudo systemctl daemon-reload
+              sudo systemctl enable 4-in-a-row-backend
+            fi
+
             # Stop existing backend
             sudo systemctl stop 4-in-a-row-backend || true
 
@@ -62,7 +93,7 @@ jobs:
 
             # Start backend service
             sudo systemctl start 4-in-a-row-backend
-            sudo systemctl status 4-in-a-row-backend
+            sudo systemctl status 4-in-a-row-backend --no-pager
 
             # Cleanup
             rm /tmp/backend-deploy.tar.gz
