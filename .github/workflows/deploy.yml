@@ -53,25 +53,25 @@ jobs:
             if [ ! -f /etc/systemd/system/4-in-a-row-backend.service ]; then
               echo "Creating systemd service..."
               sudo tee /etc/systemd/system/4-in-a-row-backend.service > /dev/null <<'SYSTEMD'
-[Unit]
-Description=4 in a Row Backend WebSocket Server
-After=network.target
+              [Unit]  
+              Description=4 in a Row Backend WebSocket Server
+              After=network.target
 
-[Service]
-Type=simple
-User=ubuntu
-WorkingDirectory=/home/ubuntu/GATI-mail-backend/test/4-in-a-row
-ExecStart=/usr/bin/node dist/index.js
-Restart=on-failure
-RestartSec=10
-StandardOutput=append:/var/log/4-in-a-row-backend.log
-StandardError=append:/var/log/4-in-a-row-backend-error.log
-Environment=NODE_ENV=production
-Environment=PORT=3008
+              [Service]
+              Type=simple
+              User=ubuntu
+              WorkingDirectory=/home/ubuntu/GATI-mail-backend/test/4-in-a-row
+              ExecStart=/usr/bin/node dist/index.js
+              Restart=on-failure
+              RestartSec=10
+              StandardOutput=append:/var/log/4-in-a-row-backend.log
+              StandardError=append:/var/log/4-in-a-row-backend-error.log
+              Environment=NODE_ENV=production
+              Environment=PORT=3008
 
-[Install]
-WantedBy=multi-user.target
-SYSTEMD
+              [Install]
+              WantedBy=multi-user.target
+              SYSTEMD
 
               sudo systemctl daemon-reload
               sudo systemctl enable 4-in-a-row-backend
