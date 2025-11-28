@@ -51,8 +51,7 @@ jobs:
             set -e
 
             # Create backend directory if it doesn't exist
-            sudo mkdir -p /opt/4-in-a-row-backend
-            sudo chown $USER:$USER /opt/4-in-a-row-backend
+            mkdir -p /home/ubuntu/GATI-mail-backend/test/4-in-a-row
 
             # Create systemd service if it doesn't exist
             if [ ! -f /etc/systemd/system/4-in-a-row-backend.service ]; then
@@ -64,8 +63,8 @@ jobs:
 
               [Service]
               Type=simple
-              User=$USER
-              WorkingDirectory=/opt/4-in-a-row-backend
+              User=ubuntu
+              WorkingDirectory=/home/ubuntu/GATI-mail-backend/test/4-in-a-row
               ExecStart=/usr/bin/node dist/index.js
               Restart=on-failure
               RestartSec=10
@@ -86,7 +85,7 @@ jobs:
             sudo systemctl stop 4-in-a-row-backend || true
 
             # Extract new build
-            cd /opt/4-in-a-row-backend
+            cd /home/ubuntu/GATI-mail-backend/test/4-in-a-row
             tar -xzf /tmp/backend-deploy.tar.gz
 
             # Install production dependencies
