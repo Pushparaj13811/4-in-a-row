@@ -21,8 +21,8 @@ coverage/
 .cache/
 .temp/
 
-# Lock files
-package-lock.json
+# Lock files (keep package-lock.json for consistent installs)
+# package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
