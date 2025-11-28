@@ -15,7 +15,6 @@ import { db } from '../db/database.js';
 class GameAnalyticsConsumer {
   private kafka: Kafka;
   private consumer: Consumer;
-  private isRunning = false;
 
   constructor() {
     this.kafka = new Kafka({
@@ -57,8 +56,6 @@ class GameAnalyticsConsumer {
 
       console.log('📊 Subscribed to game-events topic');
       console.log('⏳ Waiting for events...\n');
-
-      this.isRunning = true;
 
       // Start consuming messages
       await this.consumer.run({
@@ -213,7 +210,6 @@ class GameAnalyticsConsumer {
    */
   async stop(): Promise<void> {
     console.log('\n🛑 Shutting down consumer...');
-    this.isRunning = false;
 
     try {
       await this.consumer.disconnect();
