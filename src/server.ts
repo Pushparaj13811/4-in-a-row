@@ -23,7 +23,7 @@ class GameServer {
 
     server.listen(PORT, () => {
       console.log(`🚀 WebSocket server running on ws://localhost:${PORT}`);
-      console.log(`🎮 4-in-a-Row Game Server Ready!`);
+      console.log(`🎮 4-in-a-Row Game Server Ready!!`);
       console.log(`📊 Matchmaking timeout: 10 seconds`);
       console.log(`🔄 Reconnection timeout: 30 seconds\n`);
     });
